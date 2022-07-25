@@ -6,6 +6,18 @@ public class GameManager : MonoBehaviour
 {
     [SerializeField] GameObject target;
     [SerializeField] GameObject pointer;
+    [SerializeField] GameObject gunPoint;
+    [SerializeField] GameObject bullet;
+
+    [SerializeField] GameObject CAFE;
+    [SerializeField] GameObject GUARDIAN;
+
+    public enum State
+    {
+        Cafe, Guardian
+    }
+
+    public State gameState = State.Cafe;
 
     [SerializeField] int numberOfClicks = 5;
     private int currentClicks = 0;
@@ -15,36 +27,95 @@ public class GameManager : MonoBehaviour
     public bool isSafe = false;
 
     private PointerBehaviour pointerScript;
-    private float prevPos = 0;
+
+    SpriteRenderer[] renderers;
 
     private void Start()
     {
         pointerScript = pointer.GetComponent<PointerBehaviour>();
+
+        gameState = State.Cafe;
+
+        renderers = GUARDIAN.GetComponentsInChildren<SpriteRenderer>();
+        foreach (SpriteRenderer x in renderers)
+        {
+            x.enabled = false;
+        }
+        renderers = CAFE.GetComponentsInChildren<SpriteRenderer>();
+        foreach (SpriteRenderer x in renderers)
+        {
+            x.enabled = true;
+        }
     }
 
     private void Update()
     {
-        if (Input.GetMouseButtonDown(0))
+        if (Input.GetKeyDown(KeyCode.Space))
         {
-            if (pointerScript.onTarget2)
+            if(gameState == State.Cafe)
             {
-                MoveTarget();
-                StartCoroutine(SetSafeMode());
-                currentClicks++;
-                if (currentClicks == numberOfClicks)
+                gameState = State.Guardian;
+
+                renderers = CAFE.GetComponentsInChildren<SpriteRenderer>();
+                foreach(SpriteRenderer x in renderers)
                 {
-                    gameActive = false;
+                    x.enabled = false;
                 }
-                if (!pointerScript.onTarget)
+                renderers = GUARDIAN.GetComponentsInChildren<SpriteRenderer>();
+                foreach (SpriteRenderer x in renderers)
                 {
-                    score -= 10;
+                    x.enabled = true;
                 }
-            }           
-            else
+            }
+            else if(gameState == State.Guardian)
             {
-                score -= 25;
+                gameState = State.Cafe;
+
+                renderers = GUARDIAN.GetComponentsInChildren<SpriteRenderer>();
+                foreach (SpriteRenderer x in renderers)
+                {
+                    x.enabled = false;
+                }
+                renderers = CAFE.GetComponentsInChildren<SpriteRenderer>();
+                foreach (SpriteRenderer x in renderers)
+                {
+                    x.enabled = true;
+                }
             }
         }
+        if(gameState == State.Cafe)
+        {
+            if (Input.GetMouseButtonDown(0))
+            {
+                if (pointerScript.onTarget2)
+                {
+                    MoveTarget();
+                    StartCoroutine(SetSafeMode());
+                    currentClicks++;
+                    if (currentClicks == numberOfClicks)
+                    {
+                        gameActive = false;
+                    }
+                    if (!pointerScript.onTarget)
+                    {
+                        score -= 10;
+                    }
+                }
+                else
+                {
+                    score -= 25;
+                }
+            }
+        }
+        else if(gameState == State.Guardian)
+        {
+            if (Input.GetMouseButtonDown(0))
+            {
+                var newBullet = Instantiate(bullet, gunPoint.transform.position, gunPoint.transform.rotation);
+                newBullet.transform.parent = GUARDIAN.transform;
+            }
+        }
+
     }
 
     void MoveTarget()
@@ -56,9 +127,7 @@ public class GameManager : MonoBehaviour
         }
         float pos;
         pos = Random.Range(0, 360);
-        print(pos);
         target.transform.eulerAngles = new Vector3(0, 0, pos);
-        prevPos = pos;
     }
 
     IEnumerator SetSafeMode()

@@ -5,9 +5,40 @@ using UnityEngine;
 public class MoveToCenter : MonoBehaviour
 {
     [SerializeField] float moveSpeed = 10f;
+    [SerializeField] float damageAmount = 5f;
 
-    private void Update()
+    private GameManager gm;
+
+    private Rigidbody2D rb;
+
+    private void Start()
     {
-        transform.Translate(-transform.position * moveSpeed * Time.deltaTime / 10);
+        rb = GetComponent<Rigidbody2D>();
+        rb.velocity = transform.position * -0.1f * moveSpeed;
+    }
+
+    private void OnEnable()
+    {
+        rb = GetComponent<Rigidbody2D>();
+        rb.velocity = transform.position * -0.1f * moveSpeed;
+
+        gm = FindObjectOfType<GameManager>();
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.CompareTag("Destructor"))
+        {
+            Destroy(gameObject);
+            gm.currentHP -= damageAmount;
+        }
+    }
+
+    private void OnMouseDown()
+    {
+        if (gm.hittable)
+        {
+            Destroy(gameObject);
+        }
     }
 }

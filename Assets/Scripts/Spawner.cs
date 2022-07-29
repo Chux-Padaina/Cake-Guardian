@@ -16,7 +16,7 @@ public class Spawner : MonoBehaviour
     private void Update()
     {
         currentTime += Time.deltaTime;
-        if(currentTime >=spawnDelay)
+        if(currentTime >=spawnDelay * gm.multiplier)
         {
             SpawnMonster();
             currentTime = 0;
@@ -31,7 +31,15 @@ public class Spawner : MonoBehaviour
         GameObject mons1 = Instantiate(monster, pos1, monster.transform.rotation);
         GameObject mons2 = Instantiate(monster, pos2, monster.transform.rotation);
 
+        float zRotRandom;
+
+        zRotRandom = Random.Range(0, 360);
+        
+        mons1.transform.eulerAngles = new Vector3(0, 0, zRotRandom);
         mons1.transform.parent = Guardian.transform;
+
+        zRotRandom = Random.Range(0, 360);
+        mons2.transform.eulerAngles = new Vector3(0, 0, zRotRandom);
         mons2.transform.parent = Guardian.transform;
 
         if (gm.gameState == GameManager.State.Cafe)

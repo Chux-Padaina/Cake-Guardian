@@ -6,7 +6,7 @@ public class MoveToCenter : MonoBehaviour
 {
     [SerializeField] float moveSpeed = 10f;
     [SerializeField] float damageAmount = 5f;
-
+    [SerializeField] ParticleSystem blast;
     private GameManager gm;
 
     private Rigidbody2D rb;
@@ -14,7 +14,7 @@ public class MoveToCenter : MonoBehaviour
     private void Start()
     {
         rb = GetComponent<Rigidbody2D>();
-        rb.velocity = transform.position * -0.1f * moveSpeed;
+        rb.velocity = transform.position * -0.1f * moveSpeed * gm.speedMulti;
     }
 
     private void OnEnable()
@@ -23,12 +23,18 @@ public class MoveToCenter : MonoBehaviour
         rb.velocity = transform.position * -0.1f * moveSpeed;
 
         gm = FindObjectOfType<GameManager>();
+        rb.AddTorque(Random.Range(-25, 25));
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.CompareTag("Destructor"))
         {
+            if(gm.gameState == GameManager.State.Guardian)
+            {
+                ParticleSystem x = Instantiate(blast, gm.transform.position, transform.rotation);
+                StartCoroutine(DesBlast(x));
+            }
             Destroy(gameObject);
             gm.currentHP -= damageAmount;
         }
@@ -38,7 +44,15 @@ public class MoveToCenter : MonoBehaviour
     {
         if (gm.hittable)
         {
+            ParticleSystem x = Instantiate(blast, transform.position, transform.rotation);
+            StartCoroutine(DesBlast(x));
             Destroy(gameObject);
         }
+    }
+
+    IEnumerator DesBlast(ParticleSystem x)
+    {
+        yield return new WaitForSeconds(0.25f);
+        Destroy(x);
     }
 }

@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class MoveToCenter : MonoBehaviour
 {
-    [SerializeField] float moveSpeed = 10f;
+    [SerializeField] float moveSpeed = 1.5f;
     [SerializeField] float damageAmount = 5f;
     [SerializeField] ParticleSystem blast;
     private GameManager gm;
